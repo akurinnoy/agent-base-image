@@ -18,7 +18,7 @@ Coding agents need a terminal multiplexer (`tmux`) for session management and a 
 
 ## Image
 
-```
+```text
 quay.io/che-incubator/agent-base:latest
 ```
 
