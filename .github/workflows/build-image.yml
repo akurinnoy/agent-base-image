@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE: quay.io/che-incubator/agent-base
+  IMAGE: quay.io/che-incubator/agentic-base-image
   TAG: latest
 
 jobs:

@@ -19,7 +19,7 @@ Coding agents need a terminal multiplexer (`tmux`) for session management and a 
 ## Image
 
 ```
-quay.io/che-incubator/agent-base:latest
+quay.io/che-incubator/agentic-base-image:latest
 ```
 
 Multi-arch: `linux/amd64`, `linux/arm64`
@@ -27,7 +27,7 @@ Multi-arch: `linux/amd64`, `linux/arm64`
 ## Building Locally
 
 ```bash
-docker buildx build --platform linux/amd64,linux/arm64 -t agent-base .
+docker buildx build --platform linux/amd64,linux/arm64 -t agentic-base-image .
 ```
 
 ## License
