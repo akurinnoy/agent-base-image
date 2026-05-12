@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  IMAGE: quay.io/che-incubator/agent-base
+  IMAGE: quay.io/che-incubator/agentic-base-image
 
 jobs:
   build-and-push:
@@ -42,4 +42,4 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.QUAY_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "{\"expiration\": ${EXPIRATION}}" \
-            "https://quay.io/api/v1/repository/che-incubator/agent-base/tag/pr-${{ github.event.pull_request.number }}"
+            "https://quay.io/api/v1/repository/che-incubator/agentic-base-image/tag/pr-${{ github.event.pull_request.number }}"
