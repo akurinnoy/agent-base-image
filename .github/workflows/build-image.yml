@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE: quay.io/che-incubator/agent-base-image
+  IMAGE: quay.io/${{ vars.QUAY_ORG || 'che-incubator' }}/agent-base-image
   TAG: latest
 
 jobs:
