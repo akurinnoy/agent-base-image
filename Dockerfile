@@ -1,19 +1,25 @@
-FROM docker.io/tsl0922/ttyd:1.7.8-alpine AS ttyd
+# Stage 1: Build chemuxer from source
+FROM node:22-alpine AS chemuxer-build
 
+RUN apk add --no-cache python3 make g++ pkgconf pixman-dev cairo-dev pango-dev git
+WORKDIR /build
+
+# Clone chemuxer PR #4 branch (agent observability REST API)
+RUN git clone --branch feature/agent-observability --depth 1 \
+    https://github.com/che-incubator/chemuxer.git .
+
+RUN npm ci
+RUN npm run build
+
+# Production dependencies only
+RUN npm ci --omit=dev
+
+# Stage 2: Final image
 FROM quay.io/devfile/universal-developer-image:ubi9-latest
 
 USER 0
 
 ARG TARGETARCH
-ARG TMUX_VERSION=3.6a
-
-RUN ARCH=$(case "${TARGETARCH}" in \
-      amd64) echo "x86_64" ;; \
-      arm64) echo "arm64" ;; \
-      *) echo "unsupported TARGETARCH=${TARGETARCH}" >&2; exit 1 ;; \
-    esac) && \
-    curl -fsSL "https://github.com/tmux/tmux-builds/releases/download/v${TMUX_VERSION}/tmux-${TMUX_VERSION}-linux-${ARCH}.tar.gz" \
-      | tar xz -C /usr/bin tmux
 
 # Install GitHub CLI
 ARG GH_VERSION=2.92.0
@@ -33,9 +39,15 @@ RUN ARCH=$(case "${TARGETARCH}" in \
     rm /tmp/gh.tar.gz /tmp/gh_checksums.txt && \
     gh --version
 
-COPY --from=ttyd /usr/bin/ttyd /usr/bin/ttyd
+# Copy chemuxer build output and production dependencies
+COPY --from=chemuxer-build /build/dist /usr/share/chemuxer/dist
+COPY --from=chemuxer-build /build/node_modules /usr/share/chemuxer/node_modules
+COPY --from=chemuxer-build /build/package.json /usr/share/chemuxer/package.json
 
 USER 1001
 
+ENV HOST=0.0.0.0
+ENV STATIC_DIR=/usr/share/chemuxer/dist/client
+
 EXPOSE 7681
-CMD ["/usr/bin/ttyd", "-W", "-p", "7681", "bash"]
+CMD ["node", "/usr/share/chemuxer/dist/server/server/src/main.js"]
