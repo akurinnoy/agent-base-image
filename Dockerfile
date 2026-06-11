@@ -9,6 +9,8 @@ RUN git clone --branch feature/agent-observability --depth 1 \
     https://github.com/che-incubator/chemuxer.git .
 
 RUN npm ci
+# Remove test files to avoid TypeScript compilation errors in Docker build
+RUN rm -rf server/src/__tests__ client/src/__tests__ 2>/dev/null || true
 RUN npm run build
 
 # Production dependencies only

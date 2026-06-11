@@ -6,15 +6,26 @@ Part of the **Agentic Workspaces** ecosystem for running AI agents inside Eclips
 
 ## What It Provides
 
-| Component | Version | Source |
-|-----------|---------|--------|
-| [Universal Developer Image](https://github.com/devfile/developer-images) | ubi9-latest | Base image with common dev tools |
-| [ttyd](https://github.com/tsl0922/ttyd) | 1.7.8 | Web terminal server (port 7681) |
-| [tmux](https://github.com/tmux/tmux) | 3.6a | Terminal multiplexer for agent session management |
+| Component | Source |
+|-----------|--------|
+| [Universal Developer Image](https://github.com/devfile/developer-images) | Base image with common dev tools |
+| [chemuxer](https://github.com/che-incubator/chemuxer) | Web terminal multiplexer with split panes, tabs, and agent REST API (port 7681) |
+| [gh CLI](https://github.com/cli/cli) | GitHub CLI for repository operations |
 
 ## Why It Exists
 
-Coding agents need a terminal multiplexer (`tmux`) for session management and a web terminal (`ttyd`) for browser access. This image bundles both on top of UDI so that workspaces have a working foundation before [tools-injector](https://github.com/che-incubator/tools-injector) adds coding agent binaries.
+Coding agents need a web-accessible terminal with session management. This image bundles chemuxer (a browser-native terminal multiplexer with REST API for agent observability) on top of UDI so that workspaces have a working foundation before [tools-injector](https://github.com/che-incubator/tools-injector) adds coding agent binaries.
+
+## Agent REST API
+
+Chemuxer exposes a REST API on port 7681 for programmatic terminal access:
+
+- `GET /agents.md` — discovery document for agents
+- `GET /api/sessions` — list terminal sessions
+- `POST /api/sessions` — create a new session
+- `GET /api/sessions/:id/buffer` — read terminal output (ANSI stripped)
+- `POST /api/sessions/:id/input` — send input to a session
+- `GET /api/feed?since=<timestamp>` — activity feed
 
 ## Image
 
