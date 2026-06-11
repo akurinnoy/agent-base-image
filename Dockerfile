@@ -1,22 +1,3 @@
-# Stage 1: Build chemuxer from source
-FROM node:22-alpine AS chemuxer-build
-
-RUN apk add --no-cache python3 make g++ pkgconf pixman-dev cairo-dev pango-dev git
-WORKDIR /build
-
-# Clone chemuxer PR #4 branch (agent observability REST API)
-RUN git clone --branch feature/agent-observability --depth 1 \
-    https://github.com/che-incubator/chemuxer.git .
-
-RUN npm ci
-# Remove test files to avoid TypeScript compilation errors in Docker build
-RUN rm -rf server/src/__tests__ client/src/__tests__ 2>/dev/null || true
-RUN npm run build
-
-# Production dependencies only
-RUN npm ci --omit=dev
-
-# Stage 2: Final image
 FROM quay.io/devfile/universal-developer-image:ubi9-latest
 
 USER 0
@@ -41,15 +22,13 @@ RUN ARCH=$(case "${TARGETARCH}" in \
     rm /tmp/gh.tar.gz /tmp/gh_checksums.txt && \
     gh --version
 
-# Copy chemuxer build output and production dependencies
-COPY --from=chemuxer-build /build/dist /usr/share/chemuxer/dist
-COPY --from=chemuxer-build /build/node_modules /usr/share/chemuxer/node_modules
-COPY --from=chemuxer-build /build/package.json /usr/share/chemuxer/package.json
+# Allow root-group writes to /etc/profile.d/ for postStart hook (injected-tools)
+RUN chmod 775 /etc/profile.d/
+
+# Install node-pty native addon (built for UDI/RHEL glibc platform)
+# Chemuxer's JS bundle is injected via shared volume, but node-pty must be
+# compiled for the target platform — Alpine-built binaries are incompatible.
+RUN source /home/tooling/.nvm/nvm.sh && \
+    npm install --prefix /usr/share/node-pty node-pty@1.1.0
 
 USER 1001
-
-ENV HOST=0.0.0.0
-ENV STATIC_DIR=/usr/share/chemuxer/dist/client
-
-EXPOSE 7681
-CMD ["node", "/usr/share/chemuxer/dist/server/server/src/main.js"]
