@@ -37,6 +37,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Post image tag as PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: image-tag
+          message: |
+            🐳 Image built and pushed:
+            ```
+            ${{ env.IMAGE }}:pr-${{ github.event.pull_request.number }}
+            ```
+
       - name: Set tag expiration (14 days)
         continue-on-error: true
         run: |
