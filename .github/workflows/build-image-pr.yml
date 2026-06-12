@@ -8,6 +8,10 @@ env:
   QUAY_ORG: ${{ vars.QUAY_ORG || 'che-incubator' }}
   IMAGE: quay.io/${{ vars.QUAY_ORG || 'che-incubator' }}/agent-base-image
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
