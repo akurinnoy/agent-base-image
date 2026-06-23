@@ -31,4 +31,11 @@ RUN chmod 775 /etc/profile.d/
 RUN source /home/tooling/.nvm/nvm.sh && \
     npm install --prefix /usr/share/node-pty node-pty@1.1.0
 
+# Install tini for proper PID 1 zombie reaping
+ARG TINI_VERSION=v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/local/bin/tini
+RUN chmod +x /usr/local/bin/tini
+
 USER 1001
+
+ENTRYPOINT ["/usr/local/bin/tini", "--"]
